@@ -2,14 +2,14 @@ use std::fs;
 
 #[derive(Debug)]
 struct Password {
-    min: u8,
-    max: u8,
+    min: usize,
+    max: usize,
     ch: char,
     password: String,
 }
 
 impl Password {
-    fn new(password: String, ch: char, min: u8, max: u8) -> Password {
+    fn new(password: String, ch: char, min: usize, max: usize) -> Password {
         Password {
             password,
             ch,
@@ -19,13 +19,13 @@ impl Password {
     }
 
     fn new_from_line(line: &str) -> Option<Password> {
-        let pieces = line.split(" ").collect::<Vec<&str>>();
+        let pieces = line.split(" ").collect::<Vec<_>>();
         if pieces.len() != 3 {
             return None
         }
-        let minmax = pieces[0].split("-").collect::<Vec<&str>>();
-        let min = minmax[0].parse::<u8>().unwrap();
-        let max = minmax[1].parse::<u8>().unwrap();
+        let minmax = pieces[0].split("-").collect::<Vec<_>>();
+        let min = minmax[0].parse::<usize>().unwrap();
+        let max = minmax[1].parse::<usize>().unwrap();
         let ch = pieces[1].chars().nth(0).unwrap();
         let password = pieces[2];
         Some(Password::new(password.to_string(), ch, min, max))
@@ -33,21 +33,15 @@ impl Password {
 
     fn is_valid(&self) -> bool {
         let matches = self.password.matches(self.ch).count();
-        if (matches > self.max as usize) || (matches < self.min as usize) {
+        if (matches > self.max) || (matches < self.min) {
             return false;
         }
         true
     }
 
     fn is_valid_solution_2(&self) -> bool {
-        let mut matches = 0;
-        if self.password.chars().nth((self.min-1) as usize).unwrap() == self.ch {
-            matches = matches + 1;
-        }
-        if self.password.chars().nth((self.max-1) as usize).unwrap() == self.ch {
-            matches = matches + 1;
-        }
-        if matches == 1 {
+        if (self.password.chars().nth(self.min-1).unwrap() == self.ch) ^
+            (self.password.chars().nth(self.max-1).unwrap() == self.ch) {
             return true;
         }
         false
