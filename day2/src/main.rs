@@ -21,7 +21,7 @@ impl Password {
     fn new_from_line(line: &str) -> Option<Password> {
         let pieces = line.split(" ").collect::<Vec<_>>();
         if pieces.len() != 3 {
-            return None
+            return None;
         }
         let minmax = pieces[0].split("-").collect::<Vec<_>>();
         let min = minmax[0].parse::<usize>().unwrap();
@@ -40,8 +40,9 @@ impl Password {
     }
 
     fn is_valid_solution_2(&self) -> bool {
-        if (self.password.chars().nth(self.min-1).unwrap() == self.ch) ^
-            (self.password.chars().nth(self.max-1).unwrap() == self.ch) {
+        if (self.password.chars().nth(self.min - 1).unwrap() == self.ch)
+            ^ (self.password.chars().nth(self.max - 1).unwrap() == self.ch)
+        {
             return true;
         }
         false
@@ -53,21 +54,37 @@ fn main() {
 }
 
 fn solution() {
-    let mut passwords: Vec<Password> = vec![];
     let content = fs::read_to_string("src/input.txt").expect("could not read file");
-    for row in content.lines() {
-        passwords.push(Password::new_from_line(row).unwrap());
-    }
-    let mut count_solution_1 = 0;
-    let mut count_solution_2 = 0;
-    for password in passwords {
-        if password.is_valid() {
-            count_solution_1 = count_solution_1 + 1;
-        }
-        if password.is_valid_solution_2() {
-            count_solution_2 = count_solution_2 + 1;
-        }
-    }
+    let passwords = parse_input(content.as_str());
+    let count_solution_1 = passwords.iter().filter(|p| p.is_valid()).count();
+    let count_solution_2 = passwords.iter().filter(|p| p.is_valid_solution_2()).count();
     println!("solution 1: {}", count_solution_1);
     println!("solution 2: {}", count_solution_2);
+}
+
+fn parse_input(input: &str) -> Vec<Password> {
+    let mut passwords: Vec<Password> = vec![];
+    for row in input.lines() {
+        passwords.push(Password::new_from_line(row).unwrap());
+    }
+    passwords
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const INPUT: &str = "1-3 a: abcde
+1-3 b: cdefg
+2-9 c: ccccccccc";
+
+    #[test]
+    fn it_test_solution_1() {
+        assert_eq!(2, parse_input(INPUT).iter().filter(|p| p.is_valid()).count());
+    }
+
+    #[test]
+    fn it_test_solution_2() {
+        assert_eq!(1, parse_input(INPUT).iter().filter(|p| p.is_valid_solution_2()).count());
+    }
 }
